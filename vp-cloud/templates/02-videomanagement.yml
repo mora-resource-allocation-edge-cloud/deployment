@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: videoserver-videomanagement
+spec:
+    ports:
+    - port: 8080
+    selector:
+        app: videoserver-videomanagement
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: videoserver-videomanagement
+spec:
+    selector:
+        matchLabels:
+            app: videoserver-videomanagement
+    template:
+        metadata:
+          labels:
+            app: videoserver-videomanagement
+        spec:
+            containers:
+                - name: videoserver-videomanagement
+                  image: {{.Values.images.cloudVms}}
+                  imagePullPolicy: Always
+                  ports:
+                  - containerPort: 8080
+                  volumeMounts: #PVC in actual production
+                      - mountPath: /video
+                        name: videoserver-video
+                      - mountPath: /videofiles
+                        name: videoserver-videofiles
+                  livenessProbe:
+                    httpGet:
+                        path: /ping
+                        port: 8080
+                    initialDelaySeconds: 60
+                    periodSeconds: 5
+                  readinessProbe:
+                      httpGet:
+                          path: /ping
+                          port: 8080
+                      initialDelaySeconds: 30
+                      periodSeconds: 5
+                  envFrom:
+                  - configMapRef:
+                      name: videoserver-videomanagement-env-file
+                  resources:
+                    limits:
+                      cpu: 500m
+                      ram: 1Gi
+                    requests:
+                      cpu: 300m
+                      ram: 512Mi
+            volumes:
+              - name: videoserver-video
+                persistentVolumeClaim:
+                  claimName: videoserver-video
+              - name: videoserver-videofiles
+                persistentVolumeClaim:
+                  claimName: videoserver-videofiles
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  name: "videoserver-videomanagement-env-file"
+data:
+  KAFKA_ADDRESS: "kafkaa:9092"
+  KAFKA_GROUP_ID: "videomanagement-consumer-group"
+  KAFKA_MAIN_TOPIC: "processing-topic"
+  MONGO_DBNAME: "{{ .Values.mongodb.databaseName }}"
+  MONGO_DBNAME_AUTH: "{{ .Values.mongodb.authenticationDatabase }}"
+  MONGO_HOST: "{{ .Values.mongodb.serviceName }}"
+  MONGO_ROOT_USERNAME: "{{ .Values.mongodb.username }}"
+  MONGO_ROOT_PASSWORD: "{{ .Values.mongodb.password }}"
+  IS_CLOUD: "{{ .Values.vms.isCloud }}"
+  EXPOSED_URL: "{{.Values.scheme}}{{ if eq .Values.vms.isCloud "true" }}{{ .Values.routes.cloudURL }}{{ else }}{{ .Values.routes.edgeURL }}{{ end }}"
+  MAX_VIDEO: "{{ .Values.vms.maxVideo }}"
+  VARIANT_TYPE: "{{ .Values.vms.variantType }}"
+  CLOUD_URL: "{{ .Values.scheme }}{{ .Values.routes.cloudURL }}"
+  NEED_KAFKA: "{{ .Values.vms.needKafkaBeans }}"

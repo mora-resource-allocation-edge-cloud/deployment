@@ -1,0 +1,122 @@
+{{- if eq .Values.vms.isCloud "false" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: videoserver-lb
+spec:
+  ports:
+    - port: 8080
+  selector:
+    app: videoserver-lb
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: expose-lb
+spec:
+  host: {{ .Values.routes.edgeURL }}
+  to:
+    kind: Service
+    name: videoserver-lb
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: videoserver-lb
+spec:
+  selector:
+    matchLabels:
+      app: videoserver-lb
+  template:
+    metadata:
+      labels:
+        app: videoserver-lb
+    spec:
+      containers:
+        - name: videoserver-gateway
+          image: {{.Values.images.edgeLb}}
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: videoserver-lb-env
+          volumeMounts:
+            - mountPath: /usr/local/etc/haproxy/haproxy.cfg
+              name: config
+              subPath: haproxy.cfg
+              readOnly: true
+            - mountPath: /usr/local/etc/haproxy/cors.lua
+              name: config
+              subPath: cors.lua
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: videoserver-lb-configfile
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  name: "videoserver-lb-env"
+data:
+  MAXCONN: "{{ .Values.lb.maxConcurrentUsers }}"
+  FRONTEND_EXPOSED_DOMAIN: "{{ .Values.routes.edgeURL }}"
+  CLOUD_EXPOSED_URL: "{{ .Values.scheme }}{{ .Values.routes.cloudURL }}"
+  EDGE_INTERNAL_SERVICE_URL: "{{ .Values.services.apiGateway.name }}:{{ .Values.services.apiGateway.port }}"
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  name: "videoserver-lb-configfile"
+data:
+
+  cors.lua: |-
+    # cors.lua
+    core.register_service("cors", "http", function(applet)
+      applet:add_header("Content-Length", "0")
+      applet:add_header("Access-Control-Allow-Origin", "*")
+      applet:add_header("Access-Control-Allow-Credentials", "true")
+      applet:add_header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Origin, User-Agent, If-Modified-Since, Cache-Control, Accept")
+      applet:add_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+      applet:add_header("Access-Control-Max-Age", "1728000")
+      applet:add_header("Location", "{{.Values.scheme }}{{ .Values.routes.cloudURL}}" .. applet.path)
+      applet:set_status(302)
+      applet:start_response()
+    end)
+
+  haproxy.cfg: |-
+
+    global
+      maxconn 100000
+      log stdout format raw local0 debug
+      lua-load /usr/local/etc/haproxy/cors.lua
+
+    defaults
+      timeout connect 10s
+      timeout client 30s
+      timeout server 30s
+      mode http
+      maxconn 100000
+      option httplog
+      log global
+
+    frontend {{ .Values.routes.edgeURL }}
+      bind 0.0.0.0:8080
+      default_backend edge
+      acl max_conn_reached fe_conn gt {{ .Values.lb.maxConcurrentUsers }}
+      acl edge_endpoints path_reg ^/vms/videos/[a-zA-Z0-9]+$|^/videofiles.*$
+      acl is_get method GET
+      http-response set-header Access-Control-Allow-Origin "*"
+      http-response set-header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, JSNLog-RequestId, activityId, applicationId, applicationUserId, channelId, senderId, sessionId"
+      http-response set-header Access-Control-Max-Age 3628800
+      http-response set-header Access-Control-Allow-Methods "GET, DELETE, OPTIONS, POST, PUT, HEAD"
+      http-request use-service lua.cors if max_conn_reached
+      http-request redirect code 301 prefix {{ .Values.scheme }}{{ .Values.routes.cloudURL }} unless edge_endpoints is_get
+      http-request redirect code 302 prefix {{ .Values.scheme }}{{ .Values.routes.cloudURL }} if max_conn_reached
+
+    backend edge
+      mode http
+      balance roundrobin
+      server edge {{ .Values.services.apiGateway.name }}:{{ .Values.services.apiGateway.port }} check maxconn {{ .Values.lb.maxConcurrentUsers }}
+
+    {{- end}}

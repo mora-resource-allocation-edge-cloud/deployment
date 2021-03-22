@@ -1,0 +1,44 @@
+{{- if or (eq .Values.vms.isCloud "true") (not (eq .Values.vms.variantType "0")) }} # Cache variant does not use any video processing service in the edge
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: videoserver-videoprocessing
+spec:
+    replicas: {{ .Values.vps.replicas }}
+    selector:
+        matchLabels:
+            app: videoserver-videoprocessing
+    template:
+        metadata:
+          labels:
+            app: videoserver-videoprocessing
+        spec:
+            containers:
+                - name: videoserver-videoprocessing
+                  image: {{.Values.images.cloudVps}}
+                  volumeMounts:
+                      - mountPath: /videofiles
+                        name: videoserver-videofiles
+                      - mountPath: /video
+                        name: videoserver-video
+                  envFrom:
+                  - configMapRef:
+                      name: videoserver-videoprocessing-env-file
+            volumes:
+                - name: videoserver-videofiles
+                  persistentVolumeClaim:
+                    claimName: videoserver-videofiles
+                - name: videoserver-video
+                  persistentVolumeClaim:
+                    claimName: videoserver-video
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: videoserver-videoprocessing-env-file
+data:
+  KAFKA_ADDRESS: kafkaa:9092
+  KAFKA_MAIN_TOPIC: processing-topic
+  IS_CLOUD: "{{ .Values.vms.isCloud }}"
+  CACHE_VARIANT: "{{ .Values.vms.variantType }}"
+{{ end }}

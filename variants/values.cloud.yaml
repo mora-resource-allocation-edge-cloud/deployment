@@ -1,0 +1,6 @@
+# Empty cause default values.yml is enough
+# Just fill the exposed routes to differentiate between SPs
+
+routes:
+  cloudURL: 'cloud-vms-1.master.particles.dieei.unict.it'
+  edgeURL: 'edge-vp-1.master.particles.dieei.unict.it'
