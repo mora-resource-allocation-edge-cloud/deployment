@@ -5,7 +5,7 @@ routes:
   edgeURL: 'edge-vp-1.master.particles.dieei.unict.it'
 
 vms:
-  isCloud: "false" # Let the micro-services know they are executing in the Edge
+  isCloud: "true" # Let the micro-services know they are executing in the Edge
   maxVideo: 10 # Set limits of the capped collection (i.e., the maximum number of video stored in the Edge, leveraging a LRU cache retention policy)
   variantType: "0" # Set the VMS to act as the Edge Cache Variant
   needKafkaBeans: "false"

@@ -8,8 +8,8 @@ spec:
   selector:
     app: mongodb
 ---
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   labels:
   name: mongodb
@@ -17,7 +17,8 @@ spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
-    app: mongodb
+    matchLabels:
+      app: mongodb
   strategy:
     activeDeadlineSeconds: 21600
     recreateParams:
@@ -31,7 +32,7 @@ spec:
     spec:
       containers:
         - env:
-            - name: MONGODB_USER
+            - name: MONGODB_USERNAME
               value: {{ .Values.mongodb.username }}
             - name: MONGODB_PASSWORD
               value: {{ .Values.mongodb.password }}
@@ -39,8 +40,9 @@ spec:
               value: {{ .Values.mongodb.password }}
             - name: MONGODB_DATABASE
               value: {{ .Values.mongodb.databaseName }}
-          image: >-
-            {{.Values.images.mongoDb}}
+          image: docker.io/bitnami/mongodb:4.4
+               # >-
+            #{{.Values.images.mongoDb}}
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -56,13 +58,13 @@ spec:
               protocol: TCP
           readinessProbe:
             exec: # /bin/sh -i -c "mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD --eval=\"db.createCollection('video', {capped: true, size: 1024000, max: 10})\""
-              command:
+ 
+             command:
                 - /bin/sh
                 - '-i'
                 - '-c'
                 - >-
-                  mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD --eval="db.createCollection('video', {capped: true, size: 1024000, max: {{.Values.vms.maxVideo}}})";
-                #    mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD --eval="quit()"
+                   mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USERNAME -p $MONGODB_PASSWORD --eval="quit()";
             failureThreshold: 3
             initialDelaySeconds: 3
             periodSeconds: 10
@@ -86,8 +88,9 @@ spec:
       terminationGracePeriodSeconds: 30
       volumes:
         - name: data
-          persistentVolumeClaim:
-            claimName: mongodb-data
+          hostPath:
+            path: /var/mongodb
+            type: DirectoryOrCreate 
   test: false
   triggers:
     - imageChangeParams:

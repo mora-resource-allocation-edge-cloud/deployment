@@ -50,10 +50,10 @@ spec:
                   resources:
                     limits:
                       cpu: 500m
-                      ram: 1Gi
+                      memory: 1Gi
                     requests:
                       cpu: 300m
-                      ram: 512Mi
+                      memory: 512Mi
             volumes:
               - name: videoserver-video
                 persistentVolumeClaim:

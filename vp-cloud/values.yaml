@@ -118,8 +118,18 @@ images:
   cloudGateway: docker.io/aleskandro/video-server:cloud-gateway
   cloudVms: docker.io/aleskandro/video-server:cloud-vms
   cloudVps: docker.io/aleskandro/video-server:cloud-vps
+
+
   mongoDb: docker-registry.default.svc:5000/openshift/mongodb
+
+
+
   kafka: wurstmeister/kafka:2.11-2.0.0
   zookeeper: library/zookeeper:3.4.13
 
-isOpenShift: true
+
+
+
+
+
+isOpenShift: false

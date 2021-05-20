@@ -9,15 +9,20 @@ spec:
     app: videoserver-gateway
 {{- if eq .Values.vms.isCloud "true" }}
 ---
-apiVersion: route.openshift.io/v1
-kind: Route
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
 metadata:
+  annotations: 
+    nginx.ingress.kubernetes.io/proxy-body-size: 1024m
   name: expose-proxy
 spec:
-  host: {{ .Values.routes.cloudURL }}
-  to:
-    kind: Service
-    name: {{ .Values.services.apiGateway.name }}
+  rules:
+  - host: {{ .Values.routes.cloudURL }}
+    http:
+      paths:
+      - backend:
+          serviceName: {{ .Values.services.apiGateway.name }}
+          servicePort: {{ .Values.services.apiGateway.port }}
 {{- end }}
 ---
 apiVersion: apps/v1
