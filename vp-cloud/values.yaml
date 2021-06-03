@@ -116,7 +116,7 @@ services:
 images:
   edgeLb: docker.io/aleskandro/video-server:edge-lb
   cloudGateway: docker.io/aleskandro/video-server:cloud-gateway
-  cloudVms: docker.io/aleskandro/video-server:cloud-vms
+  cloudVms: docker.io/aleskandro/video-server:cloud-vms3
   cloudVps: docker.io/aleskandro/video-server:cloud-vps
 
 
