@@ -21,6 +21,10 @@ spec:
           labels:
             app: videoserver-videomanagement
         spec:
+            hostAliases:
+            - ip: "172.16.0.43"
+              hostnames:
+              - "cloud-vms-1.master.particles.dieei.unict.it"
             containers:
                 - name: videoserver-videomanagement
                   image: {{.Values.images.cloudVms}}
