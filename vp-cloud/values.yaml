@@ -81,6 +81,7 @@ affinity: { }
 routes:
   cloudURL: 'cloud-vms-1.master.particles.dieei.unict.it'
   edgeURL: 'edge-vp-1.master.particles.dieei.unict.it'
+  CloudIP: ''
 
 mongodb:
   username: root
@@ -130,6 +131,5 @@ images:
 
 
 
-
-
+noDNSServerForCloud: 'false'
 isOpenShift: false

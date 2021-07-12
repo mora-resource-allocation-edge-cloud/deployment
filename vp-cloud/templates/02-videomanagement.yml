@@ -21,10 +21,12 @@ spec:
           labels:
             app: videoserver-videomanagement
         spec:
+          {{- if eq .Values.noDNSServerForCloud "true" }}
             hostAliases:
-            - ip: "172.16.0.43"
+            - ip: {{.Values.routes.CloudIP}}
               hostnames:
-              - "cloud-vms-1.master.particles.dieei.unict.it"
+              - {{.Values.routes.cloudURL}}
+           {{- end }}
             containers:
                 - name: videoserver-videomanagement
                   image: {{.Values.images.cloudVms}}
