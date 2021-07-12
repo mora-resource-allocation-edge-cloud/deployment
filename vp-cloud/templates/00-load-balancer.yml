@@ -9,15 +9,18 @@ spec:
   selector:
     app: videoserver-lb
 ---
-apiVersion: route.openshift.io/v1
-kind: Route
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
 metadata:
   name: expose-lb
 spec:
-  host: {{ .Values.routes.edgeURL }}
-  to:
-    kind: Service
-    name: videoserver-lb
+  rules:
+  - host: {{ .Values.routes.edgeURL }}
+    http:
+      paths:
+      - backend:
+          serviceName: videoserver-lb
+          servicePort: 8080
 ---
 apiVersion: apps/v1
 kind: Deployment
