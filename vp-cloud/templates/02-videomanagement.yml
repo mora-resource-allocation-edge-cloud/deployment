@@ -21,7 +21,7 @@ spec:
           labels:
             app: videoserver-videomanagement
         spec:
-          {{- if eq .Values.noDNSServerForCloud "true" }}
+          {{- if eq .Values.noDNSServerForCloud true }}
             hostAliases:
             - ip: {{.Values.routes.CloudIP}}
               hostnames:
