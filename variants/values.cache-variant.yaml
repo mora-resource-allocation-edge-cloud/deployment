@@ -10,6 +10,11 @@ vms:
   variantType: "0" # Set the VMS to act as the Edge Cache Variant
   needKafkaBeans: "false"
 
+#Parameters of the capped video collection
+mongo:
+  videoCollectionSize: 10000
+  videoCollectionMaxDocs: 10
+
 vps: # Not used here since Cache Variant does not deploy any VPS
   replicas: 1
 

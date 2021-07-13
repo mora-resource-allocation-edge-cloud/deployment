@@ -1,0 +1,33 @@
+{{- if eq .Values.vms.isCloud "false" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name:  collection-create
+spec:
+  completions: 1
+  backoffLimit: 3
+  parallelism: 1
+# ttlSecondsAfterFinished: 3600
+  template:
+    metadate:
+      labels:
+        job: create-collection
+    spec:
+      containers:
+        - env:
+            - name: MONGODB_USERNAME
+              value: {{ .Values.mongodb.username }}
+            - name: MONGODB_PASSWORD
+              value: {{ .Values.mongodb.password }}
+            - name: MONGODB_ADMIN_PASSWORD
+              value: {{ .Values.mongodb.password }}
+            - name: MONGODB_DATABASE
+              value: {{ .Values.mongodb.databaseName }}
+          name: collection-create
+          image: mongoclient/mongoclient
+          command:
+          - /bin/sh
+          - -c
+          - "mongo  {{ .Values.mongodb.serviceName }}:27017/$MONGODB_DATABASE -u $MONGODB_USERNAME -p $MONGODB_PASSWORD --eval=\"db.createCollection('video', {capped: true,   size:  {{ .Values.mongo.videoCollectionSize }},   max: {{ .Values.mongo.videoCollectionMaxDocs }} })\""
+      restartPolicy: OnFailure
+{{- end}}
