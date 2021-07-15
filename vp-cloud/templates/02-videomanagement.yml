@@ -13,6 +13,7 @@ kind: Deployment
 metadata: 
   name: videoserver-videomanagement
 spec:
+    replicas: {{ .Values.vms.replicas }}
     selector:
         matchLabels:
             app: videoserver-videomanagement
@@ -54,12 +55,7 @@ spec:
                   - configMapRef:
                       name: videoserver-videomanagement-env-file
                   resources:
-                    limits:
-                      cpu: 500m
-                      memory: 1Gi
-                    requests:
-                      cpu: 300m
-                      memory: 512Mi
+                    {{- toYaml .Values.resources.vms| nindent 20 }}
             volumes:
               - name: videoserver-video
                 persistentVolumeClaim:

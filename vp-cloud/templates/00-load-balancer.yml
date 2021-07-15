@@ -27,6 +27,7 @@ kind: Deployment
 metadata:
   name: videoserver-lb
 spec:
+  replicas: {{ .Values.lb.replicas }}
   selector:
     matchLabels:
       app: videoserver-lb
@@ -52,6 +53,8 @@ spec:
               name: config
               subPath: cors.lua
               readOnly: true
+          resources:
+            { { - toYaml .Values.resources.loadbalancer| nindent 12 } }
       volumes:
         - name: config
           configMap:

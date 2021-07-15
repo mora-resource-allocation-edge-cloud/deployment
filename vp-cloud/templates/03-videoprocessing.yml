@@ -24,6 +24,8 @@ spec:
                   envFrom:
                   - configMapRef:
                       name: videoserver-videoprocessing-env-file
+                  resources:
+                    {{- toYaml .Values.resources.vps| nindent 20 }}
             volumes:
                 - name: videoserver-videofiles
                   persistentVolumeClaim:

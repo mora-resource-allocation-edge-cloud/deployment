@@ -53,17 +53,66 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+utility: []
+
+#resources to allocate
+resources:
+  vms:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 300m
+      memory: 512Mi
+
+  vps:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 300m
+      memory: 512Mi
+
+  mongodb:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 300m
+      memory: 512Mi
+
+  apigateway:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 300m
+      memory: 512Mi
+
+  loadbalancer:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 300m
+      memory: 512Mi
+
+  kafka:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 300m
+      memory: 512Mi
+
+  zookeeper:
+    limits:
+      cpu: 400m
+      memory: 1Gi
+    requests:
+      cpu: 300m
+      memory: 512Mi
+
 
 autoscaling:
   enabled: false
@@ -84,6 +133,7 @@ routes:
   CloudIP: ''
 
 mongodb:
+  replicas: 1
   username: root
   password: toor
   authenticationDatabase: admin
@@ -91,6 +141,7 @@ mongodb:
   serviceName: mongodb
 
 vms:
+  replicas: 1
   isCloud: "true"
   maxVideo: 10
   variantType: "-1"
@@ -105,7 +156,17 @@ vps:
   replicas: 1
 
 lb:
+  replicas: 1
   maxConcurrentUsers: 100
+
+apigateway:
+  replicas: 1
+
+zookeeper:
+  replicas: 2
+
+kafka:
+  replicas: 1
 
 scheme: 'http://'
 
@@ -119,12 +180,7 @@ images:
   cloudGateway: docker.io/aleskandro/video-server:cloud-gateway
   cloudVms: docker.io/aleskandro/video-server:cloud-vms3
   cloudVps: docker.io/aleskandro/video-server:cloud-vps
-
-
-  mongoDb: docker-registry.default.svc:5000/openshift/mongodb
-
-
-
+  mongoDb: docker.io/bitnami/mongodb:4.4
   kafka: wurstmeister/kafka:2.11-2.0.0
   zookeeper: library/zookeeper:3.4.13
 

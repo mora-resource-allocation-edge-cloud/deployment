@@ -14,7 +14,7 @@ metadata:
   labels:
   name: mongodb
 spec:
-  replicas: 1
+  replicas: {{ .Values.mongodb.replicas }}
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -23,7 +23,6 @@ spec:
     activeDeadlineSeconds: 21600
     recreateParams:
       timeoutSeconds: 600
-    resources: {}
     type: Recreate
   template:
     metadata:
@@ -40,9 +39,9 @@ spec:
               value: {{ .Values.mongodb.password }}
             - name: MONGODB_DATABASE
               value: {{ .Values.mongodb.databaseName }}
-          image: docker.io/bitnami/mongodb:4.4
-               # >-
-            #{{.Values.images.mongoDb}}
+          image:
+                >-
+            {{.Values.images.mongoDb}}
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -58,7 +57,7 @@ spec:
               protocol: TCP
           readinessProbe:
             exec: # /bin/sh -i -c "mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD --eval=\"db.createCollection('video', {capped: true, size: 1024000, max: 10})\""
- 
+
              command:
                 - /bin/sh
                 - '-i'
@@ -71,8 +70,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           resources:
-            limits:
-              memory: 512Mi
+            {{- toYaml .Values.resources.mongodb| nindent 12 }}
           securityContext:
             capabilities: {}
             privileged: false
@@ -90,7 +88,7 @@ spec:
         - name: data
           hostPath:
             path: /var/mongodb
-            type: DirectoryOrCreate 
+            type: DirectoryOrCreate
   test: false
   triggers:
     - imageChangeParams:
