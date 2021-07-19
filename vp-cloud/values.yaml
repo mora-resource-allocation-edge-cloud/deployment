@@ -107,7 +107,7 @@ resources:
 
   zookeeper:
     limits:
-      cpu: 400m
+      cpu: 500m
       memory: 1Gi
     requests:
       cpu: 300m
@@ -163,7 +163,7 @@ apigateway:
   replicas: 1
 
 zookeeper:
-  replicas: 2
+  replicas: 1
 
 kafka:
   replicas: 1

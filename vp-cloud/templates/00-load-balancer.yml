@@ -54,7 +54,7 @@ spec:
               subPath: cors.lua
               readOnly: true
           resources:
-            { { - toYaml .Values.resources.loadbalancer| nindent 12 } }
+            {{- toYaml .Values.resources.loadbalancer| nindent 12 }}
       volumes:
         - name: config
           configMap:
