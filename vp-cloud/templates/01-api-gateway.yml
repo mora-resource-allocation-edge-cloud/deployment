@@ -9,6 +9,17 @@ spec:
     app: videoserver-gateway
 {{- if eq .Values.vms.isCloud "true" }}
 ---
+  {{- if eq .Values.isOpenShift true }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: expose-proxy
+spec:
+  host: {{ .Values.routes.cloudURL }}
+  to:
+    kind: Service
+    name: {{ .Values.services.apiGateway.name }}
+  {{- else }}
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -23,6 +34,7 @@ spec:
       - backend:
           serviceName: {{ .Values.services.apiGateway.name }}
           servicePort: {{ .Values.services.apiGateway.port }}
+    {{- end }}
 {{- end }}
 ---
 apiVersion: apps/v1
