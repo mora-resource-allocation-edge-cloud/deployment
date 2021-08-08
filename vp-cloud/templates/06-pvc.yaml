@@ -3,6 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: videoserver-videofiles
 spec:
+  storageClassName: {{.Values.storageClassName}}
   accessModes:
     - ReadWriteMany
   resources:
@@ -14,6 +15,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: videoserver-logs
 spec:
+  storageClassName: {{.Values.storageClassName}}
   accessModes:
     - ReadWriteMany
   resources:
@@ -25,6 +27,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: videoserver-video
 spec:
+  storageClassName: {{.Values.storageClassName}}
   accessModes:
     - ReadWriteMany
   resources:
@@ -36,6 +39,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: mongodb-data
 spec:
+  storageClassName: {{.Values.storageClassName}}
   accessModes:
     - ReadWriteOnce
   resources:

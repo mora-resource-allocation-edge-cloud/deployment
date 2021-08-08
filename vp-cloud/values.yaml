@@ -189,5 +189,7 @@ images:
 
 noDNSServerForCloud: false
 isOpenShift: false
+# storageClassName for unict okd deployment: glusterfs-storage
+storageClassName: default
 
 isMinikube: false

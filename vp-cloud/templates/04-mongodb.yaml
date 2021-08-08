@@ -179,6 +179,8 @@ spec:
       terminationGracePeriodSeconds: 30
       volumes:
         - name: data
+          persistentVolumeClaim:
+            claimName: mongodb-data
           hostPath:
             path: /var/mongodb
             type: DirectoryOrCreate

@@ -4,7 +4,7 @@ kind: PersistentVolume
 metadata:
   name: foo-pv
 spec:
-  storageClassName: "standard"
+  storageClassName: {{.Values.storageClassName}}
   accessModes:
     - ReadWriteMany
     - ReadWriteOnce
@@ -20,7 +20,7 @@ kind: PersistentVolume
 metadata:
   name: foo-pv3
 spec:
-  storageClassName: "standard"
+  storageClassName: {{.Values.storageClassName}}
   accessModes:
     - ReadWriteMany
     - ReadWriteOnce
@@ -36,7 +36,7 @@ kind: PersistentVolume
 metadata:
   name: foo-pv2
 spec:
-  storageClassName: "standard"
+  storageClassName: {{.Values.storageClassName}}
   accessModes:
     - ReadWriteMany
     - ReadWriteOnce
@@ -52,7 +52,7 @@ kind: PersistentVolume
 metadata:
   name: foo-pv4
 spec:
-  storageClassName: "standard"
+  storageClassName: {{.Values.storageClassName}}
   accessModes:
     - ReadWriteMany
     - ReadWriteOnce
