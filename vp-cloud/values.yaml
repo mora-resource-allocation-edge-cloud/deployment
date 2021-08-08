@@ -189,3 +189,5 @@ images:
 
 noDNSServerForCloud: false
 isOpenShift: false
+
+isMinikube: false
