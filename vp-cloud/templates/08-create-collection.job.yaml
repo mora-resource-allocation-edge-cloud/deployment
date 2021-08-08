@@ -9,7 +9,7 @@ spec:
   parallelism: 1
 # ttlSecondsAfterFinished: 3600
   template:
-    metadate:
+    metadata:
       labels:
         job: create-collection
     spec:
@@ -28,6 +28,7 @@ spec:
           command:
           - /bin/sh
           - -c
-          - "mongo  {{ .Values.mongodb.serviceName }}:27017/$MONGODB_DATABASE -u $MONGODB_USERNAME -p $MONGODB_PASSWORD --eval=\"db.createCollection('video', {capped: true,   size:  {{ .Values.mongo.videoCollectionSize }},   max: {{ .Values.mongo.videoCollectionMaxDocs }} })\""
+          - "mongo  {{ .Values.mongodb.serviceName }}:27017/$MONGODB_DATABASE -u $MONGODB_USERNAME -p
+          $MONGODB_PASSWORD --eval=\"db.createCollection('video', {capped: true,   size:  {{ .Values.mongodb.videoCollectionSize }},   max: {{ .Values.mongodb.videoCollectionMaxDocs }} })\""
       restartPolicy: OnFailure
 {{- end}}

@@ -1,61 +1,6 @@
-# Default values for vp-cloud.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-replicaCount: 1
-
-image:
-  repository: nginx
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
-
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-podAnnotations: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-service:
-  type: ClusterIP
-  port: 80
-
-ingress:
-  enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths: []
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
 utility: []
 
-#resources to allocate
+# resources limits and requests for the deployments
 resources:
   vms:
     limits:
@@ -64,7 +9,6 @@ resources:
     requests:
       cpu: 300m
       memory: 512Mi
-
   vps:
     limits:
       cpu: 500m
@@ -72,7 +16,6 @@ resources:
     requests:
       cpu: 300m
       memory: 512Mi
-
   mongodb:
     limits:
       cpu: 500m
@@ -80,7 +23,6 @@ resources:
     requests:
       cpu: 300m
       memory: 512Mi
-
   apigateway:
     limits:
       cpu: 500m
@@ -88,7 +30,6 @@ resources:
     requests:
       cpu: 300m
       memory: 512Mi
-
   loadbalancer:
     limits:
       cpu: 500m
@@ -96,7 +37,6 @@ resources:
     requests:
       cpu: 300m
       memory: 512Mi
-
   kafka:
     limits:
       cpu: 500m
@@ -104,7 +44,6 @@ resources:
     requests:
       cpu: 300m
       memory: 512Mi
-
   zookeeper:
     limits:
       cpu: 500m
@@ -112,42 +51,70 @@ resources:
     requests:
       cpu: 300m
       memory: 512Mi
-
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: { }
-
 routes:
+  # This is the domain that expose the Cloud variant VMS service
+  # If you're deploying a non-cloud variant (variantType > -1) it also is the domain to which a client is redirected
+  # if the Edge deployment cannot serve a user's request
   cloudURL: 'cloud-vms-1.master.particles.dieei.unict.it'
+  # This is the domain to which expose the main route used by the clients
+  # (actually this would be achieved by a location transparency DNS configuration)
   edgeURL: 'edge-vp-1.master.particles.dieei.unict.it'
+  # NOT RECOMMENDED: when a DNS server is not available to solve the CloudURL,
+  #  one can choose to provide the IP at which the CloudURL should resolve.
+  # This is provided to the micro-services that need to communicate with the cloud service
+  # when a variant different than the cloud one is performed.
+  # In order to enable it, you also have to set the DNSServerForCloud to false
   CloudIP: ''
 
+# Set this to false if you want to use CloudIP above
+# TODO remove me in favor of len(cloudIP) != 0
+DNSServerForCloud: true
+
+# Note: the following two values cannot be together set at true
+# If you are deploing on openshift, set isOpenshift at true and isMinikube at false
+# If you are deploying on a generic k8s cluster, set both at false (dynamic provisioning should be used and have a
+#  look at the storageClassName to use
+# If you are deploying on Minikube set isOpenshift at true and isMinikube at true
+# TODO validation
+
+# If you are deploying on OpenShift, keep this true (Note, it's a string)
+# TODO make isOpenshift bool
+isOpenShift: "true"
+# If you are deploying on Minikube, set this true
+isMinikube: false
+
+# storageClassName for unict okd deployment: glusterfs-storage
+# Storage Class Name to use for the persistent volume claims
+storageClassName: default
+
+# Settings for MongoDB
 mongodb:
-  replicas: 1
+  replicas: 1 # Not used. Keep replicas at 1
   username: root
   password: toor
   authenticationDatabase: admin
   databaseName: video-server
   serviceName: mongodb
+  # The following values are used if variantType is different than -1 (edge variants)
+  videoCollectionSize: 10000
+  videoCollectionMaxDocs: 10
 
 vms:
   replicas: 1
+  # Let the micro-services know they are executing Edge variant (false) or not (TODO remove in favor
+  # of variantType == -1
   isCloud: "true"
-  maxVideo: 10
-  variantType: "-1"
-  needKafkaBeans: "true"
+  # (enabled if isCloud === 'false')
+  # Set limits of the capped collection (i.e., the maximum number of video stored in
+  # the Edge, leveraging a LRU cache retention policy)
+  maxVideo: 10 # Set limits of the capped collection (i.e., the maximum number of video stored in the Edge, leveraging a LRU cache retention policy)
+  variantType: "-1" # TODO use an integer
+  needKafkaBeans: "true" # Set it "false" (string) if VariantType == 0
+  # TODO make needKafkaBeans boolean
 
-# VariantType
+# VariantType:
+
+# -1: Cloud Variant
 # 0: Cache Variant
 # 1: Offline-encoding variant
 # 2: Online-encoding variant
@@ -157,6 +124,7 @@ vps:
 
 lb:
   replicas: 1
+  # Sets the maximum number of concurrent users an Edge Deployment can serve
   maxConcurrentUsers: 100
 
 apigateway:
@@ -168,13 +136,17 @@ zookeeper:
 kafka:
   replicas: 1
 
-scheme: 'http://'
+# The scheme at which the system will have to reply
+#  (http:// or https:// if you configure SSL, currently not supported)
+scheme: "http://"
 
 services:
   apiGateway:
-    name: 'api-gateway'
+    name: api-gateway
     port: '8081'
+    # TODO can an integer be used here?
 
+# Images url for the containers
 images:
   edgeLb: docker.io/aleskandro/video-server:edge-lb
   cloudGateway: docker.io/aleskandro/video-server:cloud-gateway
@@ -183,13 +155,5 @@ images:
   mongoDb: docker.io/bitnami/mongodb:4.4
   kafka: wurstmeister/kafka:2.11-2.0.0
   zookeeper: library/zookeeper:3.4.13
-
-
-
-
-noDNSServerForCloud: false
-isOpenShift: false
-# storageClassName for unict okd deployment: glusterfs-storage
-storageClassName: default
-
-isMinikube: false
+  # This image is used by default for mongoDb if isOpenShift is set to true
+  openShiftMongoDb: docker-registry.default.svc:5000/openshift/mongodb

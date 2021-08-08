@@ -42,7 +42,7 @@ spec:
             - name: MONGODB_DATABASE
               value: {{ .Values.mongodb.databaseName }}
           image: >-
-          {{.Values.images.mongoDb}}
+          {{.Values.images.openShiftMongoDb}}
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
