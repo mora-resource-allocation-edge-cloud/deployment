@@ -15,7 +15,7 @@ vps: # Not used here since Cache Variant does not deploy any VPS
   replicas: 1
 
 
-isOpenShift: "false"
+isOpenShift: false
 isMinikube: true
 
 # Parameters of the capped video collection

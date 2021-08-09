@@ -4,7 +4,7 @@ routes:
   # Change the following accordingly to your needs
   cloudURL: 'cloud-vms-1.minikube.localhost'
 
-isOpenshift: "false"
+isOpenShift: false
 isMinikube: true
 vms:
   isCloud: "true" # Let the micro-services know they are executing in the Edge

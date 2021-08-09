@@ -68,7 +68,7 @@ routes:
 
 # Set this to false if you want to use CloudIP above
 # TODO remove me in favor of len(cloudIP) != 0
-DNSServerForCloud: true
+noDNSServerForCloud: false
 
 # Note: the following two values cannot be together set at true
 # If you are deploing on openshift, set isOpenshift at true and isMinikube at false
@@ -78,8 +78,7 @@ DNSServerForCloud: true
 # TODO validation
 
 # If you are deploying on OpenShift, keep this true (Note, it's a string)
-# TODO make isOpenshift bool
-isOpenShift: "true"
+isOpenShift: true
 # If you are deploying on Minikube, set this true
 isMinikube: false
 
@@ -143,8 +142,7 @@ scheme: "http://"
 services:
   apiGateway:
     name: api-gateway
-    port: '8081'
-    # TODO can an integer be used here?
+    port: 8081
 
 # Images url for the containers
 images:
