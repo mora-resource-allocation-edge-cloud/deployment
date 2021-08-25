@@ -180,7 +180,4 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: mongodb-data
-          hostPath:
-            path: /var/mongodb
-            type: DirectoryOrCreate
 {{- end }}
