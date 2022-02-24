@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name:  collection-create
+  name:  collection-create{{ now | date "20060102150405" }}
 spec:
   completions: 1
   backoffLimit: 3
