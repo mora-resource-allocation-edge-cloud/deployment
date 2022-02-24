@@ -28,7 +28,8 @@ spec:
           command:
           - /bin/sh
           - -c
-          - "mongo  {{ .Values.mongodb.serviceName }}:27017/$MONGODB_DATABASE -u $MONGODB_USERNAME -p
+          - "mongo  {{ .Values.mongodb.serviceName }}:27017/$MONGODB_DATABASE -u $MONGODB_USERNAME -p 
+          $MONGODB_PASSWORD --eval=\"db.video.drop()\"&& mongo  {{ .Values.mongodb.serviceName }}:27017/$MONGODB_DATABASE -u $MONGODB_USERNAME -p
           $MONGODB_PASSWORD --eval=\"db.createCollection('video', {capped: true,   size:  {{ .Values.mongodb.videoCollectionSize }},   max: {{ .Values.mongodb.videoCollectionMaxDocs }} })\""
       restartPolicy: OnFailure
 {{- end}}
