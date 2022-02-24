@@ -128,7 +128,7 @@ spec:
               value: {{ .Values.mongodb.username }}
             - name: MONGODB_PASSWORD
               value: {{ .Values.mongodb.password }}
-            - name: MONGODB_ADMIN_PASSWORD
+            - name: MONGODB_ROOT_PASSWORD
               value: {{ .Values.mongodb.password }}
             - name: MONGODB_DATABASE
               value: {{ .Values.mongodb.databaseName }}

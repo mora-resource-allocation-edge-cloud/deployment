@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name:  collection-create
+  name:  collection-create{{ now | date "20060102150405" }}
 spec:
   completions: 1
   backoffLimit: 3
@@ -28,7 +28,8 @@ spec:
           command:
           - /bin/sh
           - -c
-          - "mongo  {{ .Values.mongodb.serviceName }}:27017/$MONGODB_DATABASE -u $MONGODB_USERNAME -p
+          - "mongo  {{ .Values.mongodb.serviceName }}:27017/$MONGODB_DATABASE -u $MONGODB_USERNAME -p 
+          $MONGODB_PASSWORD --eval=\"db.video.drop()\"&& mongo  {{ .Values.mongodb.serviceName }}:27017/$MONGODB_DATABASE -u $MONGODB_USERNAME -p
           $MONGODB_PASSWORD --eval=\"db.createCollection('video', {capped: true,   size:  {{ .Values.mongodb.videoCollectionSize }},   max: {{ .Values.mongodb.videoCollectionMaxDocs }} })\""
       restartPolicy: OnFailure
 {{- end}}
